@@ -1,0 +1,10 @@
+{
+  "name": "p1",
+  "version": "0.0.1",
+  "description": "Project builder",
+  "main": "index.js",
+  "license": "ISC",
+  "dependencies": {
+    "forge-struct": "0.0.4"
+  }
+}
