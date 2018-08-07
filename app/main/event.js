@@ -1,7 +1,6 @@
 import { ipcMain } from 'electron';
 import { spawn } from 'child_process';
 import { create as ForgeCreate } from 'forge-struct';
-// import * as ConfigManager from './manager/config';
 import templatePackageBuilder from './templates/package.json';
 
 export function register() { // eslint-disable-line

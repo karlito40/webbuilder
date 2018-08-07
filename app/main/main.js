@@ -13,7 +13,7 @@
 import { app, BrowserWindow } from 'electron';
 import MenuBuilder from './menu';
 import * as Event from './event';
-import * as ConfigManager from './manager/config';
+import * as ProjectManager from './manager/ProjectManager';
 import { homedir } from 'os';
 
 let mainWindow = null;
@@ -63,8 +63,16 @@ app.on('ready', async () => {
   // }
 
   console.log('Manage config...');
-  await ConfigManager.entry(homedir() + '/.webbuilder');
+  await ProjectManager.Root.entry(homedir() + '/.webbuilder');
   console.log('Manage done...');
+
+  ProjectManager.Local.listener.on('open', (project) => {
+    console.log('local project open ', project);
+  }).on('update', () => {
+    console.log('project change');
+  });
+
+  ProjectManager.Local.watch('my-first-project');
 
   Event.register();
 

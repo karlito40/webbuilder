@@ -1,5 +1,6 @@
 {
   "rules": {
+    "import/no-absolute-path": "false",
     "flowtype/boolean-style": ["error", "boolean"],
     "flowtype/define-flow-type": "warn",
     "flowtype/delimiter-dangle": ["error", "never"],
