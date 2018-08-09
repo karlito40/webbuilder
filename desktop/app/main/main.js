@@ -15,6 +15,7 @@ import MenuBuilder from './menu';
 import * as Event from './event';
 import * as ProjectManager from './manager/ProjectManager';
 import { homedir } from 'os';
+import * as PluginApp from './server/plugin';
 
 let mainWindow = null;
 
@@ -65,6 +66,8 @@ app.on('ready', async () => {
   console.log('Manage config...');
   await ProjectManager.Root.entry(homedir() + '/.webbuilder');
   console.log('Manage done...');
+
+  const pluginServer = await PluginApp.boot();
 
   ProjectManager.Local.events.on('open', (project) => {
     console.log('local project open ', project);
