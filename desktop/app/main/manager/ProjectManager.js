@@ -4,86 +4,36 @@ import chokidar from 'chokidar';
 import { EventEmitter } from 'events';
 import debounce from 'debounce';
 
-// import { create as ForgeCreate } from 'forge-struct';
-
-// const readFile = promisify(fs.readFile);
 const readdir = promisify(fs.readdir);
 const lstat = promisify(fs.lstat);
 
 export const Root = {
   _dir: null,
-  _config: null,
-  getDir() { return this._dir; },
-  getConfigPath() { return `${this._dir}/config.json`; },
-  getConfig() { return this._config; },
-  setConfig(config) { this._config = config; },
-  setConfigPath(path) { this._dir = path; },
-  save(config) {
-    return this.setConfig(config);
-    // console.log('save config...');
-    // console.log('content', config);
-    // return ForgeCreate([
-    //   { path: this.getConfigPath(), content: JSON.stringify(config, null, 2) }
-    // ]).then(() => {
-    //   console.log('config saved !');
-    //   return this.setConfig(config);
-    // });
-  },
-  // addProject(projectPath) {
-  //   const config = this.getConfig();
-  //   config.projects.push(projectPath);
-  //   return this.save(config);
-  // },
-  async entry(path) {
-    if (this.getDir()) {
-      console.log('error config entry cannot reassigne _configDir');
-      return;
-    }
+  _projects: null,
 
-    this.setConfigPath(path);
-
-    // try {
-    //   console.log('read config file', this.getConfigPath());
-    //   const configJson = await readFile(this.getConfigPath());
-    //   console.log('parse config file');
-    //   return this.setConfig(JSON.parse(configJson));
-    // } catch (e) {
-    //   if (e.code !== 'ENOENT') {
-    //     console.log('error config entry', e);
-    //     return false;
-    //   }
-    // }
-
-    console.log('await init config ...');
-    const config = await this.initConfig();
-    console.log('await init config done !');
-
-    return config;
-  },
-  async initConfig() {
-    console.log('initialize config...');
-
+  async refresh() {
     const files = await readdir(this.getDir());
     const filesInfo = await Promise.all(files.map(async file => ({
       name: file,
       stat: await lstat(`${this.getDir()}/${file}`)
     })));
-    const projects = filesInfo.filter(info => info.stat.isDirectory())
+    this._projects = filesInfo.filter(info => info.stat.isDirectory())
       .map((info, i) => ({
         id: i,
         name: info.name,
         path: `${this.getDir()}/${info.name}`,
         lastAccess: info.stat.atime
       }));
+  },
 
-    try {
-      return this.save({ projects });
-    } catch (e) {
-      console.log('error config saved', e);
-    }
+  entry(path) {
+    this._dir = path;
+    return this.refresh();
+  },
 
-    return false;
-  }
+  getDir() { return this._dir; },
+  getConfigPath() { return `${this._dir}/config.json`; },
+  getProjects() { return this._projects; },
 };
 
 export const Local = {
@@ -96,7 +46,7 @@ export const Local = {
     return this.open(projectName);
   },
   open(projectName) {
-    const project = Root.getConfig().projects.find(p => p.name === projectName);
+    const project = Root.getProjects().find(p => p.name === projectName);
     this._selectedProject = project;
     this._emit('open', this._selectedProject);
     return this._selectedProject;

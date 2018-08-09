@@ -11,11 +11,12 @@
  * @flow
  */
 import { app, BrowserWindow } from 'electron';
+import { homedir } from 'os';
 import MenuBuilder from './menu';
 import * as Event from './event';
 import * as ProjectManager from './manager/ProjectManager';
-import { homedir } from 'os';
 import * as PluginApp from './server/plugin';
+import * as ipc from '../shared/ipc';
 
 let mainWindow = null;
 
@@ -75,27 +76,38 @@ app.on('ready', async () => {
     console.log('project change');
   });
 
-  ProjectManager.Local.watch('my-first-project');
+  // ProjectManager.Local.watch('my-first-project');
+  ProjectManager.Local.open('my-first-project');
 
   Event.register();
+  ipc.main.expose(function toto(x, y) {
+    console.log('toto expose call', x, y);
+  })
 
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
-    height: 728
+    height: 728,
+    // props for plugin issue
+    // webSecurity: false
+    // contextIsolation: true
   });
 
   let parentPath = __dirname.split('/');
   parentPath.pop();
   parentPath = parentPath.join('/');
+
   mainWindow.loadURL(`file://${parentPath}/renderer/app.html`);
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
+
   mainWindow.webContents.on('did-finish-load', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+
+    ipc.main.pipe(mainWindow);
     mainWindow.show();
     mainWindow.focus();
   });
