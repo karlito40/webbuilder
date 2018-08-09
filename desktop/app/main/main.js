@@ -66,7 +66,7 @@ app.on('ready', async () => {
   await ProjectManager.Root.entry(homedir() + '/.webbuilder');
   console.log('Manage done...');
 
-  ProjectManager.Local.listener.on('open', (project) => {
+  ProjectManager.Local.events.on('open', (project) => {
     console.log('local project open ', project);
   }).on('update', () => {
     console.log('project change');

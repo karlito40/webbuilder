@@ -89,7 +89,7 @@ export const Root = {
 export const Local = {
   _selectedProject: null,
   _watcher: null,
-  listener: new EventEmitter(),
+  events: new EventEmitter(),
 
   select(projectName) {
     this.exit();
@@ -133,7 +133,7 @@ export const Local = {
     this._selected = null;
   },
   _emit(...args) {
-    process.nextTick(() => this.listener.emit(...args));
+    process.nextTick(() => this.events.emit(...args));
   }
 
 };
