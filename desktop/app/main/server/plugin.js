@@ -28,11 +28,10 @@ export function getPort() {
 
 function createAvailableServer(app, fromPort, toPort) {
   let port;
-  let checkServer;
   return new Promise(async (resolve, reject) => {
     port = await portscanner.findAPortNotInUse(fromPort, toPort, '127.0.0.1');
 
-    checkServer = http.createServer(app);
+    const checkServer = http.createServer(app);
     checkServer.once('error', reject);
 
     console.log('plugin server checking port', port);
