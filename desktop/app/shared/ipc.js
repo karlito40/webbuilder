@@ -4,59 +4,35 @@ import { EventEmitter } from 'events';
 
 const TIMEOUT = 5000;
 
-export const main = {
-  channels: {},
-  expose(func) {
+const main = {
+  cmd: {},
+  expose(cmdName, func) {
     if(typeof func != 'function') {
       throw new Error('Only function are exposable');
     }
 
-    const channel = func.name;
-    if(this.channels[channel]) {
+    if(this.cmd[cmdName]) {
       throw new Error('A function with same name is already defined');
     }
 
-    this.channels[channel] = func;
-    ipcMain.on(channel, (event, arg) => {
-      const response = func(...arg.data);
-      event.sender.send(createChannelResponse(channel, arg.messageId), response);
+    this.cmd[cmdName] = func;
+    ipcMain.on(cmdName, async (event, arg) => {
+      const response = await func(...arg.data);
+      event.sender.send(createChannelResponse(cmdName, arg.messageId), response);
     })
-  },
-  link(win) {
-    win.send('ipc.reconciliate', JSON.stringify(Object.keys(this.channels)));
   }
-}
+};
 
-export const renderer = {
+const renderer = {
   _messageSent: 0,
-  cmd: {},
-
-  reconciliate() {
-    return new Promise((resolve) => {
-      ipcRenderer.once('ipc.reconciliate', (event, channelsJson) => {
-        for(const channel of JSON.parse(channelsJson)) {
-          this.add(channel);
-        }
-        resolve();
-      });
-    })
-  },
-
-  add(channel) {
-    console.log(`renderer add ${channel}`);
-    this.cmd[channel] = (...args) => {
-      console.log(`renderer add ${channel}`, args);
-      return this.send(channel, ...args);
-    };
-  },
-
-  // call the main process
-  send(channel, ...args) {
+  send(cmdName, ...args) {
     const eventEmitter = new EventEmitter();
     const id = this._messageSent++;
 
+    console.log(`renderer send ${cmdName}`, args);
+
     return new Promise((resolve, reject) => {
-      const channelResponse = createChannelResponse(channel, id);
+      const channelResponse = createChannelResponse(cmdName, id);
       const timeout = setTimeout(() => {
         ipcRenderer.removeListener(channelResponse, listener);
         reject(new Error('Request Timeout'))
@@ -69,15 +45,30 @@ export const renderer = {
 
       ipcRenderer.once(channelResponse, listener);
 
-      ipcRenderer.send(channel, {
+      ipcRenderer.send(cmdName, {
         messageId: id,
         data: args
       });
     });
 
   },
-
 }
+
+renderer.cmd = new Proxy(renderer, {
+  get(obj, prop) {
+    return (...args) => {
+      return obj.send(prop, ...args);
+    };
+  }
+});
+
+
+export default {
+  main,
+  renderer,
+  service: renderer.cmd,
+  expose: main.expose.bind(main)
+};
 
 function createChannelResponse(channel, id) {
   return `${channel}.response.${id}`;

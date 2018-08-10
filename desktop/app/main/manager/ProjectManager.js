@@ -13,7 +13,7 @@ export const Root = {
 
   async refresh() {
     const files = await readdir(this.getDir());
-    const filesInfo = await Promise.all(files.map(async file => ({
+    const filesInfo = await Promise.all(files.map(async file => ({ 
       name: file,
       stat: await lstat(`${this.getDir()}/${file}`)
     })));

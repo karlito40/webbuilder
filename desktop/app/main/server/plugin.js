@@ -6,8 +6,7 @@ import { Root } from '../manager/ProjectManager';
 
 let server;
 
-
-export async function boot() {
+export async function initialize() {
   console.log('starting plugin server...');
   const app = express();
 

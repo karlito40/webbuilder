@@ -16,9 +16,16 @@ import MenuBuilder from './menu';
 import * as Event from './event';
 import * as ProjectManager from './manager/ProjectManager';
 import * as PluginApp from './server/plugin';
-import * as ipc from '../shared/ipc';
+import ipc from '../shared/ipc';
+import routes from './routes';
 
 let mainWindow = null;
+
+// process.on('unhandledRejection', (e) => {
+//   console.error('tracing unhandledRejection: ');
+//   console.error(e);
+//   process.kill(1);
+// });
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -68,7 +75,8 @@ app.on('ready', async () => {
   await ProjectManager.Root.entry(homedir() + '/.webbuilder');
   console.log('Manage done...');
 
-  const pluginServer = await PluginApp.boot();
+  const pluginServer = await PluginApp.initialize();
+  routes.initialize();
 
   ProjectManager.Local.events.on('open', (project) => {
     console.log('local project open ', project);
@@ -79,12 +87,9 @@ app.on('ready', async () => {
   // ProjectManager.Local.watch('my-first-project');
   ProjectManager.Local.open('my-first-project');
 
-  Event.register();
-  ipc.main.expose(function toto(x, y) {
-    console.log('toto expose call', x, y);
-    console.log('ProjectManager', ProjectManager);
+  ipc.expose('toto', function(x, y) {
     return ProjectManager.Root.getProjects();
-  })
+  });
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -109,7 +114,6 @@ app.on('ready', async () => {
       throw new Error('"mainWindow" is not defined');
     }
 
-    ipc.main.link(mainWindow);
     mainWindow.show();
     mainWindow.focus();
   });
