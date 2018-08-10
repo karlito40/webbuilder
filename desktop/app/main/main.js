@@ -14,8 +14,8 @@ import { app, BrowserWindow } from 'electron';
 import { homedir } from 'os';
 import MenuBuilder from './menu';
 import * as Event from './event';
-import * as ProjectManager from './manager/ProjectManager';
-import * as PluginApp from './server/plugin';
+import * as ProjectManager from './managers/ProjectManager';
+import * as PluginServer from './servers/plugin';
 import ipc from '../shared/ipc';
 import routes from './routes';
 
@@ -75,7 +75,7 @@ app.on('ready', async () => {
   await ProjectManager.Root.entry(homedir() + '/.webbuilder');
   console.log('Manage done...');
 
-  const pluginServer = await PluginApp.initialize();
+  const pluginServer = await PluginServer.initialize();
   routes.initialize();
 
   ProjectManager.Local.events.on('open', (project) => {

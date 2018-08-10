@@ -1,4 +1,4 @@
-import * as ProjectManager from '../manager/ProjectManager';
+import * as ProjectManager from '../managers/ProjectManager';
 
 export default class ProjectController {
   constructor() {

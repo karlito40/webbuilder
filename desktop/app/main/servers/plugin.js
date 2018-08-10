@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import portscanner from 'portscanner';
-import { Root } from '../manager/ProjectManager';
+import { Root } from '../managers/ProjectManager';
 
 let server;
 
