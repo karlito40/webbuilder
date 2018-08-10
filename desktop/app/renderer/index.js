@@ -8,7 +8,8 @@ import './app.global.css';
 
 (async () => {
   await ipc.renderer.reconciliate();
-  ipc.renderer.cmd.toto(666, 23);
+  const result = await ipc.renderer.cmd.toto(666, 23);
+  console.log('result', result);
 
   const store = configureStore();
 

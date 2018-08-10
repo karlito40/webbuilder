@@ -16,14 +16,14 @@ export const main = {
       throw new Error('A function with same name is already defined');
     }
 
-    this.channels[channel] = func.toString();
+    this.channels[channel] = func;
     ipcMain.on(channel, (event, arg) => {
-      console.log(`main on ${channel}`, arg);
-      event.sender.send(createChannelResponse(channel, arg.messageId), callback());
+      const response = func(...arg.data);
+      event.sender.send(createChannelResponse(channel, arg.messageId), response);
     })
   },
-  pipe(win) {
-    win.send('ipc.reconciliate', JSON.stringify(this.channels));
+  link(win) {
+    win.send('ipc.reconciliate', JSON.stringify(Object.keys(this.channels)));
   }
 }
 
@@ -33,10 +33,9 @@ export const renderer = {
 
   reconciliate() {
     return new Promise((resolve) => {
-      ipcRenderer.once('ipc.reconciliate', (event, channelsEncoded) => {
-        for(const [channel, funcString] of Object.entries(JSON.parse(channelsEncoded))) {
-          this.cmd[channel] = eval(`(${funcString})`);
-          this.cmd[channel](10, 20);
+      ipcRenderer.once('ipc.reconciliate', (event, channelsJson) => {
+        for(const channel of JSON.parse(channelsJson)) {
+          this.add(channel);
         }
         resolve();
       });
@@ -47,7 +46,7 @@ export const renderer = {
     console.log(`renderer add ${channel}`);
     this.cmd[channel] = (...args) => {
       console.log(`renderer add ${channel}`, args);
-      return this.send(channel, args);
+      return this.send(channel, ...args);
     };
   },
 
@@ -72,7 +71,7 @@ export const renderer = {
 
       ipcRenderer.send(channel, {
         messageId: id,
-        args
+        data: args
       });
     });
 

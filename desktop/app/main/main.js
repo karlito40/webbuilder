@@ -82,6 +82,8 @@ app.on('ready', async () => {
   Event.register();
   ipc.main.expose(function toto(x, y) {
     console.log('toto expose call', x, y);
+    console.log('ProjectManager', ProjectManager);
+    return ProjectManager.Root.getProjects();
   })
 
   mainWindow = new BrowserWindow({
@@ -107,7 +109,7 @@ app.on('ready', async () => {
       throw new Error('"mainWindow" is not defined');
     }
 
-    ipc.main.pipe(mainWindow);
+    ipc.main.link(mainWindow);
     mainWindow.show();
     mainWindow.focus();
   });
