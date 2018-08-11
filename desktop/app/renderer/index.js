@@ -7,6 +7,7 @@ import ipc from '../shared/ipc';
 import api from '../shared/api';
 import './app.global.css';
 
+ipc.expose('fromRenderer', () => 'fromRenderer:result');
 (async () => {
   // console.log('ipc.renderer.cmd', ipc.renderer.cmd);
   const result = await ipc.service.toto(666, 23);

@@ -113,6 +113,10 @@ app.on('ready', async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+    setTimeout(async () => {
+      const x = await ipc.service.fromRenderer();
+      console.log('x', x);
+    }, 1000)
 
     mainWindow.show();
     mainWindow.focus();
