@@ -13,6 +13,8 @@ import './app.global.css';
   console.log('result', result);
   const result2 = await api.fetch('GET', '/projects');
   console.log('result2', result2);
+  const result3 = await ipc.service.unknow(666, 23);
+  console.log('result3', result3);
 })();
 
 const store = configureStore();
