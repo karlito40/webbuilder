@@ -46,7 +46,7 @@ const _service = {
 
     return new Promise((resolve, reject) => {
       const targets = (isMain)
-        ? BrowserWindow.getAllWindows()
+        ? BrowserWindow.getAllWindows().map(win => win.webContents)
         : [ipc];
 
       const timeout = setTimeout(() => {
@@ -96,7 +96,7 @@ _service.cmd = new Proxy(_service, {
 
 export default {
   renderer: ipcRenderer,
-  main: ipcRenderer,
+  main: ipcMain,
   service: _service.cmd,
   expose: exposable.add.bind(exposable)
 };
